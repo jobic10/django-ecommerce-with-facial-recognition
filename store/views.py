@@ -25,6 +25,7 @@ harcascadePath = os.path.join(
     settings.BASE_DIR, "haarcascade_frontalface_default.xml")
 
 
+@login_required
 def verify(request):
     # Verify a transaction given a reference code "refcode".
     ref = request.GET.get('reference', None)
@@ -54,6 +55,7 @@ def verify(request):
     return redirect(reverse('store'))
 
 
+@login_required
 def pay(request):
     # Charge a customer N100.
     id = (request.user.customer.id)
@@ -68,7 +70,10 @@ def pay(request):
         response = transaction.initialize(request.user.email, int(total))
         if response[0] == 200 or response[0] == '200':
             url = response[3]['authorization_url']
-            return redirect(url)
+            try:
+                return redirect(url)
+            except:
+                messages.error(request, "Please check your internet settings")
             # response = transaction.charge(request.user.email, url, int(total))
         else:
             messages.error(request, "Please connect to internet")
@@ -184,7 +189,6 @@ def checkout(request):
                 ship = shipping_form.save(commit=False)
                 ship.customer = request.user.customer
                 ship.order = order
-                print(order)
                 ship.save()
                 # Go to paystack
                 return redirect(reverse('pay'))
