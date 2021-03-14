@@ -1,0 +1,44 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+
+<div class="row">
+
+    <div class="col-lg-12">
+        <div class="box-element">
+            
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                <h3 style="text-align:center;">{{ error }}</h3>
+            </div>
+            {% endif %}
+            
+            {% for message in messages %}
+            <div class="alert alert-success" role="alert">
+                <h3 style="text-align: center;">{{ message }}</h3>
+            </div>
+            {% endfor %}
+<h4 class="alert alert-info">Login Form</h4>
+            <form action="" class="" method="post">
+                {% csrf_token %}
+                <div class="form-field">
+                    <input type="text" class="form-control" placeholder="Username..." name="username" required>
+                </div>
+                 <div class="form-field">
+                    <input type="password" class="form-control" placeholder="Password..." name="password" required>
+                </div>
+
+                <div class="text-center" style="margin-top: 20px; margin-bottom: 20px;">
+                    <button type="submit" class="btn btn-success bt center-block">Login</button> <hr/>
+                    <a class="btn btn-primary bt center-block" href="{% url 'registration' %}">Register</a>
+                    <a class="btn btn-danger bt center-block" href="{% url 'reset_password' %}">Reset password</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+
+</div>
+
+{% endblock %}

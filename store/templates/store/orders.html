@@ -1,0 +1,60 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+
+<div class="row">
+
+    <div class="col-lg-12">
+        <div class="box-element">
+            {% if orders %}
+           
+            
+            <table class="table">
+                <tr>
+                    <th>#</th>
+                    <th>Status</th>
+                    <th>Quantity</th>
+                    <th>Sum</th>
+                    <th>Action</th>
+                </tr>
+
+                {% for order in orders %}
+                {% if order.get_item_total < 1 %}
+                  
+                {% else %}
+                   <tr>
+                    {% comment %}
+                    <td>{{ order.id }}</td>
+                    {% endcomment %}
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        {% if order.complete %}
+                            Completed
+                        {% else %}
+                            In progress
+                        {% endif %}
+                    </td>
+                    <td>{{ order.get_item_total }}</td>
+                    <td>&#8358; {{ order.get_cart_total }}</td>
+                    <td>{{ order }}</td>
+
+                </tr>
+                {% endif %}
+                
+               
+                {% endfor %}
+            </table>
+            {% else %}
+            <h3>No History Yet, Please Use The Store!</h3>
+              
+            {% endif %}
+        </div>
+    </div>
+
+
+</div>
+
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,11 @@
+.git/
+.idea/
+venv/
+TrainingImages/
+Trainer.yml
+db.*
+guide.txt
+*.pyc
+*~
+*.swp
+.env
