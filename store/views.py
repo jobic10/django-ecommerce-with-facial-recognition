@@ -178,8 +178,10 @@ def checkout(request):
     exist = ShippingAddress.objects.filter(
         customer=request.user.customer, order=order).exists()
     if exist:
-        instance = Order.objects.get(
-            customer=request.user.customer, transaction=None)
+        instance = ShippingAddress.objects.filter(
+            customer=request.user.customer, order=order)[0]
+        shipping_form = ShippingForm(request.POST or None, instance=instance)
+
     if order is None:
         messages.error(request, "Order cannot be empty")
         return redirect(reverse('store'))
