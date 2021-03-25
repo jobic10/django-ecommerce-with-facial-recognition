@@ -1,0 +1,42 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% block content %}
+
+<div class="row">
+
+    <div class="col-lg-12">
+        <div class="box-element">
+            <table class="table">
+                <tr>
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total Price</th>
+                </tr>
+
+                {% for item in order_items %}
+                   <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.product }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>&#8358; {{ item.product.price }}</td>
+                    <td>&#8358; {{ item.get_total }}</td>
+
+                </tr>
+                
+               
+                {% endfor %}
+            </table>
+              
+        </div>
+        <a href="{% url 'orders' %}" class="btn btn-info">Go Back</a>
+    </div>
+
+
+</div>
+
+
+</div>
+
+{% endblock %}

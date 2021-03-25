@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, reverse, get_object_or_404
 from .models import *
 from django.http import JsonResponse
 from .forms import ShippingForm, CreateUserForm, CustomerForm
@@ -293,6 +293,16 @@ def completed_orders(request):
     return render(request, 'store/orders.html', context)
 
 
+@login_required
+def view_completed_orders(request, order_id):
+    order, items, customer = return_order_and_items(request)
+    order = get_object_or_404(Order, id=order_id)
+    order_items = OrderItem.objects.filter(order=order)
+    context = {'items': items,
+               'order': order,  'order_items': order_items}
+    return render(request, 'store/view_orders.html', context)
+
+
 @if_unauthenticated
 def login_view(request):
     if request.method == 'POST':
@@ -319,52 +329,62 @@ def login_view(request):
 
 
 def TRACK(phone):
+    import os
+    os.environ['OPENCV_VIDEOIO_PRIORITY_MSMF'] = '0'
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     recognizer.read(os.path.join(settings.BASE_DIR, "Trainer.yml"))
     faceCascade = cv2.CascadeClassifier(harcascadePath)
 
     font = cv2.FONT_HERSHEY_COMPLEX_SMALL
+    cv2.VideoCapture(0).release()
+    cv2.destroyAllWindows()
     cam = cv2.VideoCapture(0)
     good = 0
     bad = 0
     value = 0
     while True:
-        ret, img = cam.read()
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        faces = faceCascade.detectMultiScale(gray, 1.2, 2)
-        if value != 0:
-            break
-        for (x, y, w, h) in faces:
-            cv2.rectangle(img, (x-20, y-20), (x+w+20, y+h+20),
-                          (0, 255, 0), 4)  # Online
-            Id, conf = recognizer.predict(gray[y:y + h, x:x + w])
-            #  a confidence less than 50 indicates a good face recognition
-            if conf < 50:  # Good one is 50
-                # Now, we count if this confidence is up to 5
-                if Id != phone:
-                    bad = bad + 1
-                    if bad > 5:
+        try:
+            ret, img = cam.read()
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            faces = faceCascade.detectMultiScale(gray, 1.2, 2)
+            if value != 0:
+                break
+            for (x, y, w, h) in faces:
+                cv2.rectangle(img, (x-20, y-20), (x+w+20, y+h+20),
+                              (0, 255, 0), 4)  # Online
+                Id, conf = recognizer.predict(gray[y:y + h, x:x + w])
+                #  a confidence less than 50 indicates a good face recognition
+                if conf < 50:  # Good one is 50
+                    # Now, we count if this confidence is up to 5
+                    if Id != phone:
+                        bad = bad + 1
+                        if bad > 5:
+                            value = -1
+                            break
+                    else:
+                        good = good + 1
+                        if good > 5:
+                            value = 1
+                            break
+                else:
+                    bad = bad + 0.3
+                    if bad > int(5):
                         value = -1
                         break
-                else:
-                    good = good + 1
-                    if good > 5:
-                        value = 1
-                        break
-            else:
-                bad = bad + 0.3
-                if bad > int(5):
-                    value = -1
-                    break
-                Id = 'Keep Head Still'
-                tt = str(Id)
-                #  store the unknown images in the images unknown folder
-                cv2.putText(img, str(tt), (x, y + h - 10),
-                            font, 0.8, (255, 255, 255), 1)
-            print("Bad = " + str(bad) + " while good is " + str(good))
-            cv2.imshow(
-                'PLEASE KEEP HEAD STILL - LIKE YOU DID WHILE REGISTERING', img)
-        if cv2.waitKey(1000) == ord('q'):
+                    Id = 'Keep Head Still'
+                    tt = str(Id)
+                    #  store the unknown images in the images unknown folder
+                    cv2.putText(img, str(tt), (x, y + h - 10),
+                                font, 0.8, (255, 255, 255), 1)
+                print("Bad = " + str(bad) + " while good is " + str(good))
+                cv2.imshow(
+                    'PLEASE KEEP HEAD STILL - LIKE YOU DID WHILE REGISTERING', img)
+            if cv2.waitKey(1000) == ord('q'):
+                value = -1
+                break
+        except:
+            cam.release()
+            cv2.destroyAllWindows()
             value = -1
             break
     cam.release()

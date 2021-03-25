@@ -12,6 +12,8 @@ urlpatterns = [
     path('validate_form/', views.validate_form, name="validate_form"),
     #     path('order/', views.completed_order, name="order"),
     path('orders/', views.completed_orders, name="orders"),
+    path('orders/details/<int:order_id>',
+         views.view_completed_orders, name="view_orders"),
     path('verify', views.verify, name="verify"),
     path('pay/', views.pay, name="pay"),
     path('login/', views.login_view, name="login"),
